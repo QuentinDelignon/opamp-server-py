@@ -1,0 +1,22 @@
+[project]
+name = "opamp-server-py"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "qdeli"}
+]
+readme = "README.md"
+requires-python = ">=3.10,<4.0"
+dependencies = [
+    "fastapi (>=0.115.11,<0.116.0)",
+    "protobuf-to-pydantic[all] (>=0.3.1.1,<0.4.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry.group.dev.dependencies]
+grpcio-tools = "^1.71.0"
+
