@@ -1,0 +1,45 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+processors:
+  batch:
+
+exporters:
+  debug:
+
+extensions:
+  health_check:
+  pprof:
+  zpages:
+  opamp:
+    server:
+      ws:
+        tls:
+          insecure: true
+        endpoint: 'ws://host.docker.internal:8000/ws'
+    #instance_uid: '72fc9d2e-a6af-4f81-b1e5-13e31eae86aa'
+    agent_description:
+      non_identifying_attributes:
+        cluster_name: docker-compose
+
+service:
+  extensions: [health_check, pprof, zpages,opamp]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+    metrics:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
+
+

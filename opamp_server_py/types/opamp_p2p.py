@@ -8,8 +8,10 @@ from google.protobuf.message import Message  # type: ignore
 from protobuf_to_pydantic.customer_validator import check_one_of
 from pydantic import BaseModel
 from pydantic import Field
-from pydantic import model_validator
+from pydantic import model_validator , field_validator
 import typing
+import base64
+import uuid
 
 class AgentToServerFlags(IntEnum):
     AgentToServerFlags_Unspecified = 0
@@ -285,7 +287,7 @@ class AgentToServer(BaseModel):
 # Globally unique identifier of the running instance of the Agent. SHOULD remain
 # unchanged for the lifetime of the Agent process.
 # MUST be 16 bytes long and SHOULD be generated using the UUID v7 spec.
-    instance_uid: bytes = Field(default=b"")
+    instance_uid: str = Field(default="")
 # The sequence number is incremented by 1 for every AgentToServer sent
 # by the Agent. This allows the Server to detect that it missed a message when
 # it notices that the sequence_num is not exactly by 1 greater than the previously
@@ -341,6 +343,15 @@ class AgentToServer(BaseModel):
 # A message indicating the components that are available for configuration on the agent.
 # Status: [Development]
     available_components: AvailableComponents = Field(default_factory=AvailableComponents)
+
+    @field_validator('instance_uid')
+    @classmethod
+    def parse_uid(cls, v):
+        if isinstance(v,bytes):
+            return str(uuid.UUID(bytes=base64.b64decode(v)))
+        if isinstance(v,str):
+            return str(uuid.UUID(bytes=base64.b64decode(v.encode('ascii'))))
+        return v
 
 class ComponentDetails(BaseModel):
 # Extra key/value pairs that may be used to describe the component.
@@ -415,9 +426,9 @@ class TLSCertificate(BaseModel):#  The (cert,private_key) pair should be issued 
 
 #  Alternatively the certificate may be self-signed, assuming the Server can
 #  verify the certificate.
-#     """
-#      Status: [Beta]
-#     """
+    """
+     Status: [Beta]
+    """
 
 # PEM-encoded certificate. Required.
     cert: bytes = Field(default=b"")
